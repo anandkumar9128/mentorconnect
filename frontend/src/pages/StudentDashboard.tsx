@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Briefcase, GraduationCap, DollarSign, LayoutDashboard, Calendar, History, Settings, IndianRupee } from 'lucide-react';
+import { Search, Briefcase, GraduationCap, LayoutDashboard, Calendar, History, Settings, IndianRupee } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiClient } from '../api/apiClient';
 import { useDebounce } from '../hooks/useDebounce';

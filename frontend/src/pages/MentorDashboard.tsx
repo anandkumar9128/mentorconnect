@@ -5,12 +5,10 @@ import {
   History,
   Settings,
   User,
-  Clock,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { apiClient } from "../api/apiClient";
 import type { Booking } from "../types";
-import Avatar from "../components/Avatar";
 import LiveSessionWrapper from "../components/LiveSessionWrapper";
 import type { SidebarItem } from "../components/Sidebar";
 import DashboardLayout from "../components/DashboardLayout";
