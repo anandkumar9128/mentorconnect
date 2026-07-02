@@ -26,7 +26,6 @@ const Login: React.FC = () => {
         body: JSON.stringify({ email, password }),
       });
 
-      
       login(data);
     } catch (err: any) {
       setError(err.message);
@@ -36,47 +35,50 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-card glass-panel">
-        <div className="auth-header">
-          <h2>Welcome Back</h2>
-          <p>Log in to access your dashboard</p>
-        </div>
-        
-        <form className="auth-form" onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input 
-              type="email" 
-              id="email" 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
-              required 
-            />
+    <div className="auth-wrapper">
+      <div className="auth-container">
+        <div className="auth-card">
+          <div className="auth-header">
+            <h2>Welcome to MentorConnect</h2>
+          </div>
+
+          <div className="action-tabs">
+            <div className="action-tab active">Sign in</div>
+            <Link to="/register" className="action-tab">Create account</Link>
           </div>
           
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <input 
-              type="password" 
-              id="password" 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-              required 
-            />
-          </div>
+          <form className="auth-form" onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label htmlFor="email">Email</label>
+              <input 
+                type="email" 
+                id="email" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                required 
+              />
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="password">Password</label>
+              <input 
+                type="password" 
+                id="password" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="At least 6 characters"
+                required 
+              />
+            </div>
+            
+            {error && <div className="error-message" style={{ color: 'var(--error-color)', fontSize: '0.9rem', textAlign: 'center' }}>{error}</div>}
+            
+            <button type="submit" className="btn-primary auth-submit" disabled={loading}>
+              {loading ? 'Signing in...' : 'Sign in'}
+            </button>
+          </form>
           
-          {error && <div className="error-message" style={{ color: 'var(--error-color)', fontSize: '0.9rem', textAlign: 'center' }}>{error}</div>}
-          
-          <button type="submit" className="btn-primary auth-submit" disabled={loading}>
-            {loading ? 'Logging In...' : 'Log In'}
-          </button>
-        </form>
-        
-        <div className="auth-footer">
-          <p>Don't have an account? <Link to="/register" className="auth-link">Sign up</Link></p>
         </div>
       </div>
     </div>

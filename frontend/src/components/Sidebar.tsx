@@ -20,10 +20,6 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ items, activeTab, onTabChange, user, onLogout }) => {
   return (
     <aside className="sidebar">
-      <div className="sidebar-logo">
-        <h2 className="text-gradient">MentorConnect</h2>
-      </div>
-
       <nav className="sidebar-nav">
         {items.map((item) => (
           <button

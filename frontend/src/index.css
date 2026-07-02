@@ -1,23 +1,24 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:wght@400;500;600;700&display=swap');
 
 :root {
   /* Color Palette */
-  --bg-color: #0f172a;
-  --bg-secondary: #1e293b;
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --primary-color: #3b82f6;
-  --primary-hover: #2563eb;
-  --accent-color: #8b5cf6;
-  --border-color: rgba(255, 255, 255, 0.1);
+  --bg-color: #F7F5EF;
+  --bg-secondary: #ffffff;
+  --text-primary: #173C2C;
+  --text-secondary: #6B7280;
+  --primary-color: #173C2C;
+  --primary-hover: #102B1F;
+  --accent-color: #245741;
+  --border-color: #E2DFD8;
   --success-color: #10b981;
   --error-color: #ef4444;
 
   /* Typography */
-  --font-main: 'Inter', sans-serif;
+  --font-main: 'Lora', serif;
+  --font-serif: 'Lora', serif;
   
   /* Utilities */
-  --radius-sm: 6px;
+  --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 20px;
   --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -49,7 +50,7 @@ ul {
 
 /* Glassmorphism Classes */
 .glass-panel {
-  background: rgba(30, 41, 59, 0.7);
+  background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border-color);
@@ -86,7 +87,7 @@ ul {
 }
 
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.05);
   border-color: var(--text-secondary);
 }
 

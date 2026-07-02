@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Briefcase, GraduationCap, DollarSign, LayoutDashboard, Calendar, History, Settings } from 'lucide-react';
+import { Search, Briefcase, GraduationCap, DollarSign, LayoutDashboard, Calendar, History, Settings, IndianRupee } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiClient } from '../api/apiClient';
 import { useDebounce } from '../hooks/useDebounce';
 import type { Mentor, Booking } from '../types';
 import Avatar from '../components/Avatar';
 import BookingModal from '../components/BookingModal';
-import VideoRoom from '../components/VideoRoom';
-import Sidebar from '../components/Sidebar';
+import LiveSessionWrapper from '../components/LiveSessionWrapper';
 import type { SidebarItem } from '../components/Sidebar';
+import DashboardLayout from '../components/DashboardLayout';
+import StatCard from '../components/StatCard';
+import SessionList from '../components/SessionList';
+import BookingList from '../components/BookingList';
+import { isSessionExpired } from '../utils/sessionUtils';
 import '../styles/Dashboard.css';
 
 const StudentDashboard: React.FC = () => {
@@ -73,8 +77,8 @@ const StudentDashboard: React.FC = () => {
     setTimeout(() => setSuccessMessage(''), 3000);
   };
 
-  const upcomingBookings = bookings.filter(b => b.status === 'paid' || b.status === 'pending');
-  const completedBookings = bookings.filter(b => b.status === 'completed');
+  const upcomingBookings = bookings.filter(b => (b.status === 'paid' || b.status === 'pending') && !isSessionExpired(b.date, b.endTime));
+  const completedBookings = bookings.filter(b => b.status === 'completed' || ((b.status === 'paid' || b.status === 'pending') && isSessionExpired(b.date, b.endTime)));
 
   const renderDashboard = () => (
     <>
@@ -84,81 +88,36 @@ const StudentDashboard: React.FC = () => {
       </div>
 
       <div className="stat-cards-container">
-        <div className="stat-card glass-panel" style={{ borderRadius: '16px' }}>
-          <div>
-            <h3>Upcoming Sessions</h3>
-            <div className="stat-value">{upcomingBookings.length}</div>
-          </div>
-          <div className="stat-icon" style={{ background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary-color)' }}>
-            <Calendar size={24} />
-          </div>
-        </div>
-        
-        <div className="stat-card glass-panel" style={{ borderRadius: '16px' }}>
-          <div>
-            <h3>Completed Sessions</h3>
-            <div className="stat-value">{completedBookings.length}</div>
-          </div>
-          <div className="stat-icon" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }}>
-            <History size={24} />
-          </div>
-        </div>
-        
-        <div className="stat-card glass-panel" style={{ borderRadius: '16px' }}>
-          <div>
-            <h3>Total Sessions</h3>
-            <div className="stat-value">{bookings.length}</div>
-          </div>
-          <div className="stat-icon" style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' }}>
-            <LayoutDashboard size={24} />
-          </div>
-        </div>
+        <StatCard 
+          title="Upcoming Sessions" 
+          value={upcomingBookings.length} 
+          icon={<Calendar size={24} />} 
+          iconBgColor="rgba(99, 102, 241, 0.1)" 
+          iconColor="var(--primary-color)" 
+        />
+        <StatCard 
+          title="Completed Sessions" 
+          value={completedBookings.length} 
+          icon={<History size={24} />} 
+          iconBgColor="rgba(16, 185, 129, 0.1)" 
+          iconColor="#10b981" 
+        />
+        <StatCard 
+          title="Total Sessions" 
+          value={bookings.length} 
+          icon={<LayoutDashboard size={24} />} 
+          iconBgColor="rgba(59, 130, 246, 0.1)" 
+          iconColor="#3b82f6" 
+        />
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem' }}>
-        <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: '16px' }}>
-          <h3 style={{ marginBottom: '1rem' }}>Recent Sessions</h3>
-          {bookings.length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {bookings.slice(0, 3).map(booking => (
-                <div key={booking._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <Avatar size={40} src={(booking.mentor as any)?.profilePhoto} alt={(booking.mentor as any)?.name} />
-                    <div>
-                      <div style={{ fontWeight: 500 }}>{(booking.mentor as any)?.name}</div>
-                      <div className="text-secondary" style={{ fontSize: '0.85rem' }}>
-                        {new Date(booking.date).toLocaleDateString()} at {booking.startTime}
-                      </div>
-                    </div>
-                  </div>
-                  <span style={{ 
-                        display: 'inline-block', 
-                        padding: '0.25rem 0.75rem', 
-                        borderRadius: '30px', 
-                        fontSize: '0.8rem',
-                        background: booking.status === 'paid' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)',
-                        color: booking.status === 'paid' ? '#10b981' : '#f59e0b',
-                        textTransform: 'uppercase',
-                        fontWeight: 'bold'
-                      }}>
-                        {booking.status === 'paid' ? 'Confirmed' : booking.status}
-                  </span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-secondary">No recent sessions found.</p>
-          )}
-        </div>
-
-        <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: '16px' }}>
-          <h3 style={{ marginBottom: '1rem' }}>Quick Actions</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            <button className="btn" style={{ background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary-color)' }} onClick={() => setActiveTab('find_mentors')}>Find Mentors</button>
-            <button className="btn" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }} onClick={() => setActiveTab('upcoming_sessions')}>View Upcoming Sessions</button>
-            <button className="btn" style={{ background: 'rgba(255, 255, 255, 0.05)' }} onClick={() => setActiveTab('settings')}>View Settings</button>
-          </div>
-        </div>
+        <SessionList 
+          title="Recent Sessions" 
+          bookings={bookings.slice(0, 3)} 
+          emptyMessage="No recent sessions found." 
+          role="student" 
+        />
       </div>
     </>
   );
@@ -217,7 +176,7 @@ const StudentDashboard: React.FC = () => {
 
               <div className="mentor-footer">
                 <div className="mentor-price">
-                  <DollarSign size={18} />
+                  <IndianRupee size={18} />
                   <span>{mentor.hourlyRate || 50}<span className="price-suffix">/hr</span></span>
                 </div>
                 <button 
@@ -235,48 +194,25 @@ const StudentDashboard: React.FC = () => {
   );
 
   const renderUpcomingSessions = () => (
-    <div className="glass-panel" style={{ padding: '2rem' }}>
-      <h3 style={{ marginBottom: '1.5rem' }}>Upcoming Sessions</h3>
-      {upcomingBookings.length === 0 ? (
-        <p className="text-secondary">You have no upcoming sessions.</p>
-      ) : (
-        <div style={{ display: 'grid', gap: '1rem' }}>
-          {upcomingBookings.map((booking) => (
-            <div key={booking._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px' }}>
-              <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-                <Avatar size={50} alt={(booking.mentor as any)?.name || 'Mentor'} />
-                <div>
-                  <h4 style={{ margin: 0, fontSize: '1.1rem' }}>Session with {(booking.mentor as any)?.name}</h4>
-                  <p style={{ margin: 0, marginTop: '0.25rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                    {new Date(booking.date).toLocaleDateString()} at {booking.startTime}
-                  </p>
-                </div>
-              </div>
-              <div>
-                {booking.status === 'paid' ? (
-                  <button className="btn btn-primary" onClick={() => setActiveMeeting(booking.meetingId || `call_${booking._id}`)}>
-                    Join Meeting
-                  </button>
-                ) : (
-                  <span style={{ 
-                    display: 'inline-block', 
-                    padding: '0.4rem 1rem', 
-                    borderRadius: '30px', 
-                    fontSize: '0.85rem',
-                    background: 'rgba(245, 158, 11, 0.1)',
-                    color: '#f59e0b',
-                    textTransform: 'uppercase',
-                    fontWeight: 'bold'
-                  }}>
-                    {booking.status}
-                  </span>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+    <BookingList 
+      title="Upcoming Sessions"
+      bookings={upcomingBookings}
+      emptyTitle="No upcoming sessions"
+      emptySubtitle="You have no upcoming sessions."
+      role="student"
+      onJoinMeeting={setActiveMeeting}
+    />
+  );
+
+  const renderSessionHistory = () => (
+    <BookingList 
+      title="Session History"
+      bookings={completedBookings}
+      emptyTitle="No past sessions"
+      emptySubtitle="No past sessions found."
+      role="student"
+      onJoinMeeting={setActiveMeeting}
+    />
   );
 
   const renderSettings = () => (
@@ -287,46 +223,42 @@ const StudentDashboard: React.FC = () => {
   );
 
   return (
-    <div className="dashboard-layout">
-      <Sidebar items={sidebarItems} activeTab={activeTab} onTabChange={setActiveTab} user={user} onLogout={logout} />
-      
-      <main className="dashboard-main">
-        {activeMeeting ? (
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h2>Live Session</h2>
-              <button className="btn" onClick={() => setActiveMeeting(null)}>Close Video Room</button>
+    <DashboardLayout 
+      sidebarItems={sidebarItems} 
+      activeTab={activeTab} 
+      onTabChange={setActiveTab} 
+      user={user} 
+      onLogout={logout}
+    >
+      {activeMeeting ? (
+        <LiveSessionWrapper meetingId={activeMeeting} onClose={() => setActiveMeeting(null)} />
+      ) : (
+        <>
+          {successMessage && (
+            <div style={{ padding: '1rem', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', borderRadius: '8px', marginBottom: '1.5rem' }}>
+              {successMessage}
             </div>
-            <VideoRoom meetingId={activeMeeting} onLeave={() => setActiveMeeting(null)} />
-          </div>
-        ) : (
-          <>
-            {successMessage && (
-              <div style={{ padding: '1rem', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', borderRadius: '8px', marginBottom: '1.5rem' }}>
-                {successMessage}
-              </div>
-            )}
-            
-            {error && <div className="error-message" style={{ color: 'var(--error-color)', padding: '1rem', textAlign: 'center', marginBottom: '1.5rem' }}>{error}</div>}
+          )}
+          
+          {error && <div className="error-message" style={{ color: 'var(--error-color)', padding: '1rem', textAlign: 'center', marginBottom: '1.5rem' }}>{error}</div>}
 
-            {activeTab === 'dashboard' && renderDashboard()}
-            {activeTab === 'find_mentors' && renderFindMentors()}
-            {activeTab === 'upcoming_sessions' && renderUpcomingSessions()}
-            {activeTab === 'history' && renderUpcomingSessions()}
-            {activeTab === 'settings' && renderSettings()}
-            
-            {selectedMentor && (
-              <BookingModal 
-                mentor={selectedMentor} 
-                isOpen={true} 
-                onClose={() => setSelectedMentor(null)} 
-                onSuccess={handleBookingSuccess} 
-              />
-            )}
-          </>
-        )}
-      </main>
-    </div>
+          {activeTab === 'dashboard' && renderDashboard()}
+          {activeTab === 'find_mentors' && renderFindMentors()}
+          {activeTab === 'upcoming_sessions' && renderUpcomingSessions()}
+          {activeTab === 'history' && renderSessionHistory()}
+          {activeTab === 'settings' && renderSettings()}
+          
+          {selectedMentor && (
+            <BookingModal 
+              mentor={selectedMentor} 
+              isOpen={true} 
+              onClose={() => setSelectedMentor(null)} 
+              onSuccess={handleBookingSuccess} 
+            />
+          )}
+        </>
+      )}
+    </DashboardLayout>
   );
 };
 

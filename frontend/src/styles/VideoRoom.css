@@ -15,7 +15,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-right: 1px solid rgba(255,255,255,0.1);
+  border-right: 1px solid rgba(0,0,0,0.1);
 }
 
 .main-video-area .str-video__participant-view {
@@ -57,7 +57,7 @@
   flex: 7;
   display: flex;
   flex-direction: column;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
+  border-bottom: 1px solid rgba(0,0,0,0.1);
   overflow: hidden;
 }
 
@@ -76,7 +76,7 @@
 
 .chat-header {
   padding: 1rem;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid rgba(0,0,0,0.05);
   font-weight: 600;
   font-size: 0.9rem;
   color: #fff;
@@ -103,6 +103,6 @@
 .str-chat-react {
   --str-chat__primary-color: #6366f1;
   --str-chat__background-color: transparent;
-  --str-chat__surface-color: rgba(255,255,255,0.05);
+  --str-chat__surface-color: rgba(0,0,0,0.05);
   --str-chat__text-color: #fff;
 }

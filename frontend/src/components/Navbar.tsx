@@ -11,22 +11,9 @@ const Navbar: React.FC = () => {
     <nav className="navbar glass-panel">
       <div className="navbar-container">
         <Link to="/" className="navbar-logo">
-          <Sparkles className="logo-icon" />
-          <span className="text-gradient">MentorConnect</span>
+          <Sparkles className="logo-icon" style={{ color: 'var(--primary-color)' }} />
+          <span style={{ color: 'var(--primary-color)', fontFamily: 'var(--font-serif)' }}>MentorConnect</span>
         </Link>
-        
-        <ul className="nav-menu">
-          <li className="nav-item">
-            <Link to="/mentors" className="nav-link">Find Mentors</Link>
-          </li>
-          <li className="nav-item">
-            <Link to="/become-mentor" className="nav-link">Become a Mentor</Link>
-          </li>
-          <li className="nav-item">
-            <Link to="/about" className="nav-link">About</Link>
-          </li>
-        </ul>
-
         <div className="nav-buttons">
           {user ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
