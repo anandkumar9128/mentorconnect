@@ -28,6 +28,7 @@ export interface Booking {
     profilePhoto?: string;
   };
   mentor?: {
+    _id: string;
     name: string;
     specialization: string;
     profilePhoto?: string;
@@ -51,6 +52,7 @@ export interface Workshop {
   title: string;
   description: string;
   mentor: {
+    _id: string;
     name: string;
     profilePhoto?: string;
     specialization?: string;
