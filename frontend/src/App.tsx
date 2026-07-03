@@ -7,6 +7,7 @@ const LandingPage = lazy(() => import('./pages/LandingPage'));
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Workshops = lazy(() => import('./pages/Workshops'));
 
 // Simple loading fallback
 const PageLoader = () => (
@@ -26,6 +27,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/workshops" element={<Workshops />} />
           </Routes>
         </Suspense>
       </main>

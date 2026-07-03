@@ -42,4 +42,26 @@ export interface Booking {
   meetingProvider?: string;
   meetingId?: string;
   meetingLink?: string;
+  isWorkshop?: boolean;
+  workshopTitle?: string;
+}
+
+export interface Workshop {
+  _id: string;
+  title: string;
+  description: string;
+  mentor: {
+    name: string;
+    profilePhoto?: string;
+    specialization?: string;
+  };
+  date: string;
+  startTime: string;
+  duration: number;
+  price: number;
+  capacity: number;
+  enrolledCount: number;
+  enrolledStudents?: string[];
+  bannerImage?: string;
+  status: string;
 }

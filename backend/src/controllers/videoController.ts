@@ -47,6 +47,50 @@ export const getVideoToken = asyncHandler(async (req: Request, res: Response) =>
       } catch (chatError) {
         console.error('Failed to initialize stream chat channel:', chatError);
       }
+    } else if (meetingId && meetingId.startsWith('workshop_')) {
+      const apiKey = process.env.STREAM_API_KEY || '7jbstm59ag9c';
+      const apiSecret = process.env.STREAM_API_SECRET || 'sy9saxxzw9h7xr2mchjbcxch4vtbxm4j7jt9vesht2tdzkbja4et8wxezydyzq6w';
+      
+      try {
+        const chatClient = StreamChat.getInstance(apiKey, apiSecret);
+        const workshopId = meetingId.replace('workshop_', '');
+        
+        // Use any since we just need the model without importing Workshop here directly if not imported
+        // Wait, I should import Workshop at the top, or just require it. Let's require it inline to avoid breaking imports
+        const WorkshopModel = require('../models/Workshop').default;
+        
+        const workshop = await WorkshopModel.findById(workshopId)
+          .populate('mentor', 'name')
+          .populate('enrolledStudents', 'name');
+        
+        if (workshop) {
+          const mentorId = (workshop.mentor as any)._id.toString();
+          const studentUsers = (workshop.enrolledStudents || []).map((s: any) => ({
+            id: s._id.toString(),
+            name: s.name || 'Student'
+          }));
+          
+          const usersToUpsert = [
+            { id: mentorId, name: (workshop.mentor as any).name || 'Mentor' },
+            ...studentUsers
+          ];
+          
+          await chatClient.upsertUsers(usersToUpsert);
+          
+          const memberIds = usersToUpsert.map(u => u.id);
+          
+          const channel = chatClient.channel('messaging', meetingId, {
+            name: workshop.title || 'Workshop Chat',
+            created_by_id: mentorId,
+            members: memberIds
+          } as Record<string, any>);
+          
+          await channel.create();
+          await channel.addMembers(memberIds);
+        }
+      } catch (chatError) {
+        console.error('Failed to initialize workshop stream chat channel:', chatError);
+      }
     }
 
     res.status(200).json({ token });

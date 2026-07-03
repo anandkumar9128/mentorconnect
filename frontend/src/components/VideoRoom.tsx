@@ -12,6 +12,7 @@ import { StreamChat } from 'stream-chat';
 import { Chat, Channel, MessageList, MessageComposer, Window } from 'stream-chat-react';
 import { useAuth } from '../context/AuthContext';
 import { apiClient } from '../api/apiClient';
+import { SpeakerLayout } from '@stream-io/video-react-sdk';
 
 import '@stream-io/video-react-sdk/dist/css/styles.css';
 import 'stream-chat-react/dist/css/index.css';
@@ -24,8 +25,14 @@ interface VideoRoomProps {
 
 const apiKey = import.meta.env.VITE_STREAM_API_KEY || '7jbstm59ag9c';
 
+interface CustomVideoLayoutProps {
+  isWorkshop: boolean;
+  isMentor: boolean;
+  onCompleteSession: () => void;
+}
+
 // The custom layout component that sits inside StreamCall
-const CustomVideoLayout: React.FC = () => {
+const CustomVideoLayout: React.FC<CustomVideoLayoutProps> = ({ isWorkshop, isMentor, onCompleteSession }) => {
   const { useParticipants, useLocalParticipant } = useCallStateHooks();
   const participants = useParticipants();
   const localParticipant = useLocalParticipant();
@@ -38,7 +45,11 @@ const CustomVideoLayout: React.FC = () => {
       
       {/* LEFT: Main Video Area */}
       <div className="main-video-area">
-        {otherParticipant ? (
+        {isWorkshop ? (
+          <div style={{ height: '100%', width: '100%', position: 'relative' }}>
+            <SpeakerLayout />
+          </div>
+        ) : otherParticipant ? (
           <ParticipantView participant={otherParticipant} />
         ) : (
           <div className="waiting-screen">
@@ -48,7 +59,23 @@ const CustomVideoLayout: React.FC = () => {
         )}
 
         <div className="floating-controls">
-          <CallControls />
+          {(!isWorkshop || isMentor) ? (
+            <CallControls />
+          ) : (
+            <div style={{ background: 'rgba(0,0,0,0.6)', padding: '10px 20px', borderRadius: '30px', color: 'white' }}>
+              Audience Mode
+            </div>
+          )}
+          
+          {isWorkshop && isMentor && (
+            <button 
+              className="btn-primary" 
+              style={{ marginLeft: '1rem', background: 'var(--success-color)' }}
+              onClick={onCompleteSession}
+            >
+              Complete Session
+            </button>
+          )}
         </div>
       </div>
 
@@ -80,6 +107,24 @@ const VideoRoom: React.FC<VideoRoomProps> = ({ meetingId, onLeave }) => {
   const [call, setCall] = useState<any>(null);
   const [channel, setChannel] = useState<any>(null);
   const [error, setError] = useState('');
+  
+  const isWorkshop = meetingId.startsWith('workshop_');
+  const isMentor = user?.role === 'mentor';
+
+  const handleCompleteSession = async () => {
+    if (window.confirm('Are you sure you want to end and complete this workshop? Your earnings will be transferred.')) {
+      try {
+        const workshopId = meetingId.replace('workshop_', '');
+        await apiClient(`/workshops/${workshopId}/complete`, {
+          method: 'POST'
+        });
+        alert('Workshop completed successfully! Earnings have been added to your wallet.');
+        onLeave();
+      } catch (err: any) {
+        alert(err.message || 'Failed to complete workshop');
+      }
+    }
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -151,7 +196,11 @@ const VideoRoom: React.FC<VideoRoomProps> = ({ meetingId, onLeave }) => {
         <StreamCall call={call}>
           <Chat client={chatClient} theme="str-chat__theme-dark">
             <Channel channel={channel}>
-              <CustomVideoLayout />
+              <CustomVideoLayout 
+                isWorkshop={isWorkshop} 
+                isMentor={isMentor} 
+                onCompleteSession={handleCompleteSession}
+              />
             </Channel>
           </Chat>
         </StreamCall>

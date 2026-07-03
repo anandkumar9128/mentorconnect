@@ -9,6 +9,7 @@ export interface IUser extends Document {
   isApproved: boolean; // For mentors
   isProfileComplete: boolean;
   hourlyRate?: number;
+  walletBalance?: number;
   profilePhoto?: string;
   bio?: string;
   specialization?: string;
@@ -57,6 +58,10 @@ const userSchema: Schema = new mongoose.Schema(
     hourlyRate: {
       type: Number,
       default: 50, // default rate
+    },
+    walletBalance: {
+      type: Number,
+      default: 0,
     },
     profilePhoto: String,
     bio: String,

@@ -7,6 +7,7 @@ import userRoutes from './routes/userRoutes';
 import bookingRoutes from './routes/bookingRoutes';
 import paymentRoutes from './routes/paymentRoutes';
 import videoRoutes from './routes/videoRoutes';
+import workshopRoutes from './routes/workshopRoutes';
 import { errorHandler, notFound } from './middleware/errorHandler';
 
 dotenv.config();
@@ -26,6 +27,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/video', videoRoutes);
+app.use('/api/workshops', workshopRoutes);
 
 app.get('/', (req, res) => {
   res.send('MentorConnect API is running...');

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { X } from "lucide-react";
 import { apiClient } from "../api/apiClient";
 import type { Mentor } from "../types";
-import "./BookingModal.css";
+import "../styles/BookingModal.css";
 
 import BookingAvailability from "./BookingAvailability";
 import BookingDateTime from "./BookingDateTime";

@@ -21,12 +21,19 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, role, onJoinMeeting 
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
         <Avatar src={otherUser?.profilePhoto} alt={otherUser?.name} size={50} />
         <div>
-          <h4 style={{ fontSize: '1.1rem', marginBottom: '0.25rem' }}>
-            {role === 'student' ? `Session with ${otherUser?.name}` : otherUser?.name}
+          <h4 style={{ fontSize: '1.1rem', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            {booking.isWorkshop ? (
+              <>
+                <span style={{ background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary-color)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold', textTransform: 'uppercase' }}>Workshop</span>
+                {booking.workshopTitle}
+              </>
+            ) : (
+              role === 'student' ? `Session with ${otherUser?.name}` : otherUser?.name
+            )}
           </h4>
-          {role === 'mentor' && (
-            <p className="text-secondary" style={{ fontSize: '0.9rem' }}>{otherUser?.email}</p>
-          )}
+          <p className="text-secondary" style={{ fontSize: '0.9rem' }}>
+            {booking.isWorkshop ? `by ${otherUser?.name}` : (role === 'mentor' ? otherUser?.email : '')}
+          </p>
         </div>
       </div>
 

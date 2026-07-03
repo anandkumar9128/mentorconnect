@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Search, Briefcase, GraduationCap, LayoutDashboard, Calendar, History, Settings, IndianRupee } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiClient } from '../api/apiClient';
 import { useDebounce } from '../hooks/useDebounce';
-import type { Mentor, Booking } from '../types';
+import { useBookingsData } from '../hooks/useBookingsData';
+import type { Mentor} from '../types';
 import Avatar from '../components/Avatar';
 import BookingModal from '../components/BookingModal';
 import LiveSessionWrapper from '../components/LiveSessionWrapper';
@@ -12,23 +14,23 @@ import DashboardLayout from '../components/DashboardLayout';
 import StatCard from '../components/StatCard';
 import SessionList from '../components/SessionList';
 import BookingList from '../components/BookingList';
-import { isSessionExpired } from '../utils/sessionUtils';
 import '../styles/Dashboard.css';
 
 const StudentDashboard: React.FC = () => {
   const { user, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState(location.state?.tab || 'dashboard');
   const [mentors, setMentors] = useState<Mentor[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [loadingMentors, setLoadingMentors] = useState(true);
+  const [errorMentors, setErrorMentors] = useState('');
   
   // Modal state
   const [selectedMentor, setSelectedMentor] = useState<Mentor | null>(null);
   const [successMessage, setSuccessMessage] = useState('');
   
   // Bookings state
-  const [bookings, setBookings] = useState<Booking[]>([]);
+  const { bookings, error: bookingsError, upcomingBookings, completedBookings, refetchData } = useBookingsData('student', user);
   const [activeMeeting, setActiveMeeting] = useState<string | null>(null);
 
   const debouncedSearch = useDebounce(searchQuery, 300);
@@ -43,20 +45,16 @@ const StudentDashboard: React.FC = () => {
 
   useEffect(() => {
     const fetchMentors = async () => {
-      setLoading(true);
-      setError('');
+      setLoadingMentors(true);
+      setErrorMentors('');
       try {
         const query = debouncedSearch ? `?search=${encodeURIComponent(debouncedSearch)}` : '';
-        const [mentorsData, bookingsData] = await Promise.all([
-          apiClient(`/users/mentors${query}`),
-          apiClient('/bookings')
-        ]);
+        const mentorsData = await apiClient(`/users/mentors${query}`);
         setMentors(mentorsData);
-        setBookings(bookingsData);
       } catch (err: any) {
-        setError(err.message || 'Failed to load mentors');
+        setErrorMentors(err.message || 'Failed to load mentors');
       } finally {
-        setLoading(false);
+        setLoadingMentors(false);
       }
     };
 
@@ -67,8 +65,7 @@ const StudentDashboard: React.FC = () => {
     setSuccessMessage('Booking and payment successful!');
     
     try {
-      const bookingsData = await apiClient('/bookings');
-      setBookings(bookingsData);
+      await refetchData();
       setActiveTab('upcoming_sessions'); // Switch to upcoming sessions to show new booking
     } catch (err) {
       console.error('Failed to refresh bookings', err);
@@ -76,9 +73,6 @@ const StudentDashboard: React.FC = () => {
 
     setTimeout(() => setSuccessMessage(''), 3000);
   };
-
-  const upcomingBookings = bookings.filter(b => (b.status === 'paid' || b.status === 'pending') && !isSessionExpired(b.date, b.endTime));
-  const completedBookings = bookings.filter(b => b.status === 'completed' || ((b.status === 'paid' || b.status === 'pending') && isSessionExpired(b.date, b.endTime)));
 
   const renderDashboard = () => (
     <>
@@ -141,7 +135,7 @@ const StudentDashboard: React.FC = () => {
         </div>
       </div>
 
-      {loading ? (
+      {loadingMentors ? (
         <div className="loading-state">
           <div className="spinner"></div>
           <p>Loading mentors...</p>
@@ -240,7 +234,8 @@ const StudentDashboard: React.FC = () => {
             </div>
           )}
           
-          {error && <div className="error-message" style={{ color: 'var(--error-color)', padding: '1rem', textAlign: 'center', marginBottom: '1.5rem' }}>{error}</div>}
+          {errorMentors && <div className="error-message" style={{ color: 'var(--error-color)', padding: '1rem', textAlign: 'center', marginBottom: '1.5rem' }}>{errorMentors}</div>}
+          {bookingsError && <div className="error-message" style={{ color: 'var(--error-color)', padding: '1rem', textAlign: 'center', marginBottom: '1.5rem' }}>{bookingsError}</div>}
 
           {activeTab === 'dashboard' && renderDashboard()}
           {activeTab === 'find_mentors' && renderFindMentors()}
